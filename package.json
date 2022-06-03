@@ -1,0 +1,33 @@
+{
+  "name": "shopping-cart",
+  "version": "1.0.0",
+  "description": "This is a shopping Application",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/uraajrishu/shopping-cart-indivisual.git"
+  },
+  "keywords": [
+    "Uraj"
+  ],
+  "author": "Uraj-Mehta",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/uraajrishu/shopping-cart-indivisual/issues"
+  },
+  "homepage": "https://github.com/uraajrishu/shopping-cart-indivisual#readme",
+  "dependencies": {
+    "aws-sdk": "^2.1140.0",
+    "bcrypt": "^5.0.1",
+    "express": "^4.18.1",
+    "jsonwebtoken": "^8.5.1",
+    "lodash": "^4.17.21",
+    "moment": "^2.29.3",
+    "mongoose": "^6.3.2",
+    "multer": "^1.4.4",
+    "nodemon": "^2.0.16"
+  }
+}
