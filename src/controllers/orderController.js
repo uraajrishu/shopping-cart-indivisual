@@ -1,16 +1,13 @@
 const orderModel = require('../models/orderModel')
-const chartModel = require('../models/cartModels')
-const userModel = require('../models/userModel')
+const cartModels = require('../models/cartModels')
 const vfy = require('../utility/validation')
 
+//===============================================#Create Order================================================================>>>
 const createOrder = async function (req, res) {
-
-    try {
-        let requestBody = req.body;
+    try { let requestBody = req.body;
         const userId = req.params.userId
 
         // 👍 Authroization is being checked through Auth(Middleware)
-
         const { cartId, cancellable } = requestBody
         if (vfy.isEmptyObject(requestBody)) { return res.status(400).send({ status: false, Message: '☹️ Please provide Post Body' }); }
 
@@ -18,7 +15,7 @@ const createOrder = async function (req, res) {
         if (!vfy.isValidObjectId(cartId)) { return res.status(400).send({ status: false, Message: '☹️ Please provide a valid cartId' }) }
 
         // use userid to find cart
-        const cart = await chartModel.findOne({ userId })
+        const cart = await cartModels.findOne({ userId })
         if (!cart) return res.status(404).send({ status: false, Message: '☹️ user\'s cart unavailable' })
         if (cart._id != cartId) return res.status(400).send({ status: false, Message: '☹️ Cart id doesn\'t belong to this user' })
 
@@ -31,12 +28,12 @@ const createOrder = async function (req, res) {
         const Obj = { userId, items, totalPrice, totalItems, totalQuantity, cancellable }
 
         const createProduct = await orderModel.create(Obj);
-
         res.status(201).send({ status: true, Message: '✅ sucesfully created order', data: createProduct })
 
-    } catch (error) { res.status(500).send({ status: false, Message: error.message }) }
-}
-//-----------------------------#Put Api--------------------------
+    } catch (error) { res.status(500).send({ status: false, Message: error.message }) }}
+
+//====================================================#Put Api==========================================================>>>>
+
 const updateOrder = async function (req, res) {
     const userId = req.params.userId
     const requestBody = req.body
@@ -60,7 +57,6 @@ const updateOrder = async function (req, res) {
     // if (userByOrder["status"] == "completed") { return res.status(400).send({ status: false, Message: "This order is already compleated so you can't update it's status" }) }
 
     const updateOrder = await orderModel.findOneAndUpdate({ _id: orderId, userId }, { $set: { status } }, { new: true })
-    return res.status(200).send({ status: true, data: updateOrder, Message: "😍 Order updated successfully" })
-}
+    return res.status(200).send({ status: true, data: updateOrder, Message: "😍 Order updated successfully" })}
 
 module.exports = { createOrder, updateOrder }

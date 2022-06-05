@@ -3,7 +3,7 @@ const vfy = require('../utility/validation')
 const { uploadFile } = require('../aws.config')
 
 
-// 📦 create product
+// ===========================================📦 create product================================================>>>
 const create = async (req, res) => {
     try {
         // 👉 get data from Body
@@ -36,8 +36,7 @@ const create = async (req, res) => {
 
         // 👉 installments validation
         if (!vfy.isEmptyVar(installments)){
-            if (!Number(installments)) return res.status(400).send({ status: !true, Message: "☹️ installments must be a number!" })
-        }
+            if (!Number(installments)) return res.status(400).send({ status: !true, Message: "☹️ installments must be a number!" })}
 
         // ⬆️ upload data validation
         if (vfy.isEmptyFile(files)) return res.status(400).send({ status: !true, Message: "☹️ productImage is required!" })
@@ -56,18 +55,12 @@ const create = async (req, res) => {
         const createProduct = await productModel.create(rawData)
         return res.status(201).send({ status: true, Message: "✅ Product created successfully!", data: createProduct })
 
-    } catch (_) {
-        res.status(500).send({ status: !true, Message: _.message })
-    }
+    } catch (_) {res.status(500).send({ status: !true, Message: _.message })}}
 
-}
-
-
-// get product list ----------------------------------------------------------------------------------->>
+//===================================================== get product list =====================================================>>
 const getProduct = async function (req, res) {
 
-    try {
-        // 👉 fet query data 
+    try {// 👉 fet query data 
         const query = req.query;
         const obj = {}
         const sort = {}
@@ -85,55 +78,36 @@ const getProduct = async function (req, res) {
 
             if (!vfy.isEmptyVar(priceGreaterThan) && !vfy.isEmptyVar(priceLessThan)) {
                 obj.price = { $gte: priceGreaterThan, $lte: priceLessThan }
-            } else if (!vfy.isEmptyVar(priceGreaterThan)) {
-                obj.price = { $gte: priceGreaterThan }
-            }
-            else if (!vfy.isEmptyVar(priceLessThan)) {
-                obj.price = { $lte: priceLessThan }
-            }
+                
+            } else if (!vfy.isEmptyVar(priceGreaterThan)) { obj.price = { $gte: priceGreaterThan }}
+
+            else if (!vfy.isEmptyVar(priceLessThan)) {obj.price = { $lte: priceLessThan }}
 
             if (priceSort) {
                 if (priceSort != '-1' && priceSort != '1') return res.status(500).send({ status: false, Message: "priceSort only accept -1 and 1 as value" })
-                sort.price = Number(priceSort)
-            }
+                sort.price = Number(priceSort)}}
 
-        }
         obj.isDeleted = false
         const getProductsList = await productModel.find(obj).sort(sort)
         if (!getProductsList || getProductsList.length == 0) return res.status(404).send({ status: false, Message: `product is not available in this moment try again later` })
         return res.status(200).send({ status: true, Message: `✅ ${getProductsList.length} Product${getProductsList.length == 1 ? " is" : "s are"} Matched`, data: getProductsList })
 
-    } catch (err) {
-        res.status(500).send({ status: false, Message: err.Message })
-    }
+    } catch (err) {res.status(500).send({ status: false, Message: err.Message })}}
 
-}
-
-
-
-// get product by id ----------------->>
+// ================================================get product by id ================================================================>>
 const getProductById = async function (req, res) {
-    try {
-        let productId = req.params.productId
+    try { let productId = req.params.productId
         if (!vfy.isValidObjectId(productId)) return res.status(400).send({ status: false, Message: '😩 Invalid productId' })
 
         // db call here
         const searchProduct = await productModel.findOne({ _id: productId, isDeleted: false })
         if (!searchProduct) return res.status(404).send({ status: false, Message: '😩 prouct does not exists' })
         res.status(200).send({ status: true, Message: '✅ Success', data: searchProduct })
-    }
-    catch (err) {
-        res.status(500).send({ status: false, Message: err.message })
-    }
-}
+    }catch (err) {res.status(500).send({ status: false, Message: err.message })}}
 
-
-
-
-// 👉 api for delete product --------------------------------
+// =============================================👉 api for delete product =================================================>>>
 const deleteProduct = async (req, res) => {
-    try {
-        //👉 get params product id
+    try {//👉 get params product id
         const productId = req.params.productId;
         // 👉 check product id is a valid object id or not
         if (!vfy.isValidObjectId(productId)) return res.status(400).send({ status: !true, Message: "⚠️ Invalid ProjectID!" })
@@ -147,12 +121,7 @@ const deleteProduct = async (req, res) => {
         product.deletedAt = new Date();
         await product.save();
         res.status(200).send({ status: true, Message: "✅ Product deleted successfully!" })
-    } catch (_) {
-        res.status(500).send({ status: true, Message: _.message })
-    }
-}
-
-
+    } catch (_) { res.status(500).send({ status: true, Message: _.message })}}
 
 //----------------------------#Put api-------------------------------->>
 const updateProductById = async function (req, res) {
@@ -165,25 +134,20 @@ const updateProductById = async function (req, res) {
         const checkProductId = await productModel.findOne({ _id: productId, isDeleted: false })
         if (!checkProductId) { return res.status(404).send({ status: false, Message: 'Product not found' }) }
 
-        const { title, description, price, currencyId, currencyFormat, isFreeShipping, style, availableSizes, installments } = requestBody;
-
-        // const checkProductId = {}
-
-        
-
+        const { title, description, price, currencyId, currencyFormat, isFreeShipping, style, availableSizes, installments } = requestBody;  
 
         if (!vfy.isEmptyVar(description)) { checkProductId.description = description }
         if (!vfy.isEmptyVar(price)) {
             if (!Number(price)) return res.status(400).send({ status: false, message: "☹️ price only accept numbers like [1-9]!" });
-            checkProductId.price = price
-        }
+            checkProductId.price = price}
+
         if (!vfy.isEmptyVar(currencyId)) { checkProductId.currencyId = currencyId }
         if (!vfy.isEmptyVar(isFreeShipping)) { checkProductId.isFreeShipping = isFreeShipping }
         if (!vfy.isEmptyVar(currencyFormat)) { checkProductId.currencyFormat = currencyFormat }
         if (!vfy.isEmptyVar(style)) { checkProductId.style = style }
         if (!vfy.isEmptyVar(installments)) { checkProductId.installments = installments }
         if (!vfy.isEmptyVar(availableSizes)) {
-            // approach 1
+            
             let availableSizeObj = vfy.isValidJSONstr(availableSizes)
             if (!availableSizeObj) return res.status(400).send({ status: !true, Message: `☹️ in availableSizes, invalid json !` })
             if (!Array.isArray(availableSizeObj)) return res.status(400).send({ status: !true, Message: `☹️ in availableSizes, invalid array !` })
@@ -191,39 +155,19 @@ const updateProductById = async function (req, res) {
             let tempArr = [...checkProductId.availableSizes]
             tempArr.push(...availableSizeObj)
             tempArr = [...new Set(tempArr)] // set {"S", "XS", "M"}
-            checkProductId.availableSizes = tempArr
+            checkProductId.availableSizes = tempArr }
 
-            // approach 2
-            // if (Array.isArray(availableSizes)) {
-            //     if (!vfy.checkArrContent(availableSizes, "S", "XS", "M", "X", "L", "XXL", "XL")) return res.status(400).send({ status: !true, Message: `☹️ availableSizes is only accept S , XS , M , X , L , XXL , XL !` })
-            //     checkProductId.availableSizes.push(...availableSizes)
-            // } else {
-            //     checkProductId.availableSizes.push(availableSizes)
-            // }
-            // console.log(typeof availableSizes)
-        }
-
-        if (!vfy.isEmptyVar(title)) {
-            const isTitleAlreadyUsed = await productModel.findOne({ _id: { $ne: productId }, title: title });
+        if (!vfy.isEmptyVar(title)) {const isTitleAlreadyUsed = await productModel.findOne({ _id: { $ne: productId }, title: title });
             if (isTitleAlreadyUsed) { return res.status(400).send({ status: false, Message: `title, ${title} already exist ` }) }
-            checkProductId.title = title
-        }
+            checkProductId.title = title}
 
-        if (!vfy.isEmptyFile(files)) {
-            if (!vfy.acceptFileType(files[0], 'image/jpeg', 'image/png')) return res.status(400).send({ status: !true, Message: "⚠️ we accept jpg, jpeg or png as product image only!" })
+        if (!vfy.isEmptyFile(files)) {if (!vfy.acceptFileType(files[0], 'image/jpeg', 'image/png')) return res.status(400).send({ status: !true, Message: "⚠️ we accept jpg, jpeg or png as product image only!" })
             const ProfilePicture = await uploadFile(files[0])
-            checkProductId.productImage = ProfilePicture
-        }
+            checkProductId.productImage = ProfilePicture}
 
         await checkProductId.save();
         res.status(200).send({ status: true, message: "✅ Product info updated successfully!", data: checkProductId });
-    } catch (error) {
-        return res.status(500).send({ status: false, message: error.message });
-    }
-
-}
-
-
+    } catch (error) {return res.status(500).send({ status: false, message: error.message });}}
 
 
 module.exports = { create, getProduct, getProductById, updateProductById, deleteProduct }

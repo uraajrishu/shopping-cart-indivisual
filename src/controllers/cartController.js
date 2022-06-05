@@ -1,14 +1,12 @@
 const cartModel = require('../models/cartModels')
 const productModel = require('../models/productModels')
 const vfy = require('../utility/validation')
-/*---------------------- create cart ----------------------*/
 
+//*********************************************create cart *****************************
 const create = async (req, res) => {
-    try {
-        // get body here
+    try {// get body here
         const data = req.body
         const userId = req.params.userId
-
         // check body validation
         if (vfy.isEmptyObject(data)) return unsuccess(res, 400, '😩 Post Body is empty, Please add some key-value pairs')
 
@@ -34,34 +32,19 @@ const create = async (req, res) => {
 
         // check if the cart is already exist or not
         const cart = await cartModel.findOne({ userId })
-        if (cart) {
-            // validate cartID
+        if (cart) {// validate cartID
             if (vfy.isEmptyVar(cartId)) return unsuccess(res, 400, '☹️ CartId must be required!')
             if (!vfy.isValidObjectId(cartId)) return unsuccess(res, 400, '☹️ Invalid cartId !')
             // check both cartid's from req.body and db cart are match or not?
             if (cart._id != cartId) return unsuccess(res, 400, '☹️ CartId does\'t belong to this user!')
-
-            // check both cartid's from req.body and db cart are match or not?
-            // if (!vfy.isEmptyVar(cartId)) { // DELETE this lines of code if the cardid is mandatory ❌⭕
-            //     if (!vfy.isValidObjectId(cartId)) return unsuccess(res, 400, '☹️ Invalid cartId !')
-            //     if (cart._id != cartId) return unsuccess(res, 400, '☹️ CartId does\'t belong to this user!')
-            // }
-
-            // we neeed to check if the item already exist in my item's list or NOT!!
             let index = -1;
             for (let i = 0; i < cart.items.length; i++) {
-                if (cart.items[i].productId == productId) {
-                    index = i
-                    break
-                }
-            }
+                if (cart.items[i].productId == productId) { index = i
+                    break}}
 
             // now we need to add item
-            if (index >= 0) {
-                cart.items[index].quantity = cart.items[index].quantity + quantity
-            } else {
-                cart.items.push({ productId, quantity })
-            }
+            if (index >= 0) {cart.items[index].quantity = cart.items[index].quantity + quantity
+            } else {cart.items.push({ productId, quantity })}
 
             // update prise
             let total = cart.totalPrice + (product.price * quantity)
@@ -70,37 +53,25 @@ const create = async (req, res) => {
             cart.totalItems = cart.items.length
             // update cart
             await cart.save()
-            return success(res, 201, cart, '✅ Item added successfully and Cart updated!',)
-        }
+            return success(res, 201, cart, '✅ Item added successfully and Cart updated!',)}
 
         // round OFF total
         let total = product.price * quantity
         total = Math.round(total * 100) / 100
 
         // need to create new cart here 
-        const object = {
-            userId,
-            items: [{ productId, quantity }],
-            totalPrice: total,
-            totalItems: 1
-        }
+        const object = { userId, items: [{ productId, quantity }], totalPrice: total, totalItems: 1}
 
         const createCart = await cartModel.create(object)
         return success(res, 201, createCart, '✅ Item added successfully and New cart created!')
 
-    } catch (_) {
-        console.log(_)
-        unsuccess(res, 500, `⚠️ Error: ${_.message}`)
-    }
-}
+    } catch (_) {console.log(_)
+        unsuccess(res, 500, `⚠️ Error: ${_.message}`)}}
 
-
-
-/*---------------------- update cart ----------------------*/
+//====================================================update cart ===============================>>
 
 const update = async (req, res) => {
-    try {
-        // get body here
+    try {// get body here
         const data = req.body
         const userId = req.params.userId
 
@@ -139,34 +110,25 @@ const update = async (req, res) => {
         // we neeed to check if the item already exist in my item's list or NOT!!
         let index = -1;
         for (let i = 0; i < cart.items.length; i++) {
-            if (cart.items[i].productId == productId) {
-                index = i
-                break
-            }
-        }
+            if (cart.items[i].productId == productId) {index = i
+                break }}
 
         // now we need to add item
         if (index >= 0) {
             if (cart.items[index].quantity < removeProduct) return unsuccess(res, 400, `☹️ Can't remove, please provide removeProduct <= ${cart.items[index].quantity} !`)
-        } else {
-            return unsuccess(res, 400, `☹️ this item you trying to remove is does't exist in your cart`)
-        }
+        } else {return unsuccess(res, 400, `☹️ this item you trying to remove is does't exist in your cart`)}
         // remove item(s) 1 or all
-        if (removeProduct == 0) {
-            // update prise
+        if (removeProduct == 0) {// update prise
             let total = cart.totalPrice - (product.price * cart.items[index].quantity)
             cart.totalPrice = Math.round(total * 100) / 100
             cart.items.splice(index, 1) //remove full item
-        } else {
-            // update prise
+        } else { // update prise
             let total = cart.totalPrice - (product.price * removeProduct)
             cart.totalPrice = Math.round(total * 100) / 100
             if (cart.items[index].quantity == removeProduct) {
                 cart.items.splice(index, 1) //remove full item
-            } else {
-                cart.items[index].quantity = cart.items[index].quantity - removeProduct
-            }
-        }
+
+            } else {cart.items[index].quantity = cart.items[index].quantity - removeProduct }}
 
         // update quantity
         cart.totalItems = cart.items.length
@@ -174,45 +136,32 @@ const update = async (req, res) => {
         await cart.save()
         return success(res, 200, cart, `✅ You just ${removeProduct == 0 ? 'remove an item from your cart' : 'decress quantity by ' + removeProduct} !`,)
 
-    } catch (_) {
-        console.log(_)
-        unsuccess(res, 500, `⚠️ Error: ${_.message}`)
-    }
-}
+    } catch (_) {console.log(_)
+        unsuccess(res, 500, `⚠️ Error: ${_.message}`)}}
 
-//------------Get cart---------------------
-
+//=========================Get cart===================================>>>
 const getCart = async function (req, res) {
-    try {
-        const userId = req.params.userId
+    try {const userId = req.params.userId
         // authroization is being checked through Auth(Middleware)
         const checkCart = await cartModel.findOne({ userId: userId }) //.populate('items.productId')
         if (!checkCart) { return res.status(404).send({ status: false, Message: 'cart not found 😣' }) }
 
         res.status(200).send({ status: true, Message: 'sucess 😍', data: checkCart })
-    } catch (error) { res.status(500).send({ status: false, Message: error.message }) }
-}
+    } catch (error) { res.status(500).send({ status: false, Message: error.message }) }}
 
-//------------------------Delete cart-----------------------
+//=================================Delete cart-===================================>>>
 
 const deleteCart = async function (req, res) {
-    try {
-        const userId = req.params.userId
+    try {const userId = req.params.userId
         // authroization is being checked through Auth(Middleware)
         const checkCart = await cartModel.findOne({ userId: userId })
         if (!checkCart) { return res.status(400).send({ status: false, Message: 'cart not found 😣' }) }
         await cartModel.findOneAndUpdate({ userId: userId }, { items: [], totalPrice: 0, totalItems: 0 })
         res.status(200).send({ status: true, Message: 'sucessfully deleted' })
-    } catch (error) { res.status(500).send({ status: false, Message: error.message }) }
-}
+    } catch (error) { res.status(500).send({ status: false, Message: error.message }) }}
 
-//--------------------
-const success = (res, statusCode, Data, Message) => {
-    return res.status(statusCode).send({ status: true, Message: Message, data: Data })
-}
-
-const unsuccess = (res, statusCode, Message) => {
-    return res.status(statusCode).send({ status: !true, Message: Message })
-}
+//using try cashe in short😍******************>>
+const success = (res, statusCode, Data, Message) => {return res.status(statusCode).send({ status: true, Message: Message, data: Data })}
+const unsuccess = (res, statusCode, Message) => {return res.status(statusCode).send({ status: !true, Message: Message })}
 
 module.exports = { create, update, getCart, deleteCart }
