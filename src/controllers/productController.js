@@ -110,7 +110,7 @@ const deleteProduct = async (req, res) => {
     try {//👉 get params product id
         const productId = req.params.productId;
         // 👉 check product id is a valid object id or not
-        if (!vfy.isValidObjectId(productId)) return res.status(400).send({ status: !true, Message: "⚠️ Invalid ProjectID!" })
+        if (!vfy.isValidObjectId(productId)) return res.status(400).send({ status: !true, Message: "⚠️ Invalid ProducddtID!" })
         //👉 find product by id
         const product = await productModel.findById(productId)
         if (!product) return res.status(404).send({ status: !true, Message: "😩 Product information unavailable!" })
